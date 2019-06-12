@@ -1,16 +1,17 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
-import { dataURItoBlob, shouldRender, setState } from "../../utils";
+import { dataURItoBlob, shouldRender } from "../../utils";
 
 function addNameToDataURL(dataURL, name) {
-  return dataURL.replace(";base64", `;name=${name};base64`);
+  return dataURL.replace(";base64", `;name=${encodeURIComponent(name)};base64`);
 }
 
 function processFile(file) {
   const { name, size, type } = file;
   return new Promise((resolve, reject) => {
     const reader = new window.FileReader();
+    reader.onerror = reject;
     reader.onload = event => {
       resolve({
         dataURL: addNameToDataURL(event.target.result, name),
@@ -78,7 +79,7 @@ class FileWidget extends Component {
         values: filesInfo.map(fileInfo => fileInfo.dataURL),
         filesInfo,
       };
-      setState(this, state, () => {
+      this.setState(state, () => {
         if (multiple) {
           onChange(state.values);
         } else {
